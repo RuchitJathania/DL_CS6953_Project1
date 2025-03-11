@@ -27,7 +27,7 @@ config = {
     'avg_pool_kernel_size': 8,
     'drop': 0,  # proportion for dropout
     'squeeze_and_excitation': 1,  # True=1, False=0
-    'max_epochs': 2,
+    'max_epochs': 200,
     'optim': "sgd",
     'lr_sched': "CosineAnnealingLR",
     'momentum': 0.9,
@@ -112,7 +112,7 @@ def getDataLoaders(train_data_dir, test_pkl_dir, batch_size_in, train_tfms, vali
 
     # Create DataLoaders
     train_loader = DataLoader(full_train_dataset, batch_size=batch_size_in, shuffle=True, pin_memory=pin_Mem)
-
+    print("Train dataloader batch size:", train_loader.batch_size)
     valid_data = []
     valid_labels = []
     valid_dict = load_cifar_batch(os.path.join(train_data_dir, f'val_batch'))
@@ -165,15 +165,18 @@ class BasicBlock(nn.Module):
     def __init__(self, in_planes, planes, stride=1, conv_kernel_size=3, shortcut_kernel_size=1, drop=0.4):
         super(BasicBlock, self).__init__()
         self.drop = drop
-        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=conv_kernel_size, stride=stride, padding=int(conv_kernel_size / 2), bias=False)
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=conv_kernel_size, stride=stride,
+                               padding=int(conv_kernel_size / 2), bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=conv_kernel_size, stride=1, padding=int(conv_kernel_size / 2), bias=False)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=conv_kernel_size, stride=1,
+                               padding=int(conv_kernel_size / 2), bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
-                nn.Conv2d(in_planes, self.expansion * planes, kernel_size=shortcut_kernel_size, stride=stride, padding=int(shortcut_kernel_size / 2), bias=False),
+                nn.Conv2d(in_planes, self.expansion * planes, kernel_size=shortcut_kernel_size, stride=stride,
+                          padding=int(shortcut_kernel_size / 2), bias=False),
                 nn.BatchNorm2d(self.expansion * planes)
             )
         if self.drop:
@@ -303,6 +306,7 @@ def train(epoch, config):
     train_losses = []
     train_acc = []
     for batch_idx, (inputs, targets) in enumerate(train_loader):
+        print('Epoch: {}'.format(epoch), end="  | ")
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
@@ -318,9 +322,13 @@ def train(epoch, config):
         correct += predicted.eq(targets).sum().item()
 
         train_acc.append(100. * correct / total)
-        # print('Batch_idx: %d | Train Loss: %.3f | Train Acc: %.3f%% (%d/%d)'% (batch_idx, train_loss/(batch_idx+1), 100.*correct/total, correct, total))
-    writer.add_scalar('Loss/train_loss', np.mean(train_losses), epoch)
-    writer.add_scalar('Accuracy/train_accuracy', np.mean(train_acc), epoch)
+        print('Batch_idx: %d | Train Loss: %.3f | Train Acc: %.3f%% (%d/%d)' % (
+        batch_idx, train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+    mean_train_loss = np.mean(train_losses)
+    mean_train_acc = np.mean(train_acc)
+    print('Epoch: {} | Test Loss: {} | Test Acc: {}'.format(epoch, mean_train_loss, mean_train_acc))
+    writer.add_scalar('Loss/train_loss', mean_train_loss, epoch)
+    writer.add_scalar('Accuracy/train_accuracy', mean_train_acc, epoch)
 
 
 # Testing
@@ -344,9 +352,13 @@ def test(epoch, config, savename):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
             test_acc.append(100. * correct / total)
-            # print('Batch_idx: %d | Test Loss: %.3f | Test Acc: %.3f%% (%d/%d)'% ( batch_idx, test_loss/(batch_idx+1), 100.*correct/total, correct, total))
-        writer.add_scalar('Loss/test_loss', np.mean(test_losses), epoch)
-        writer.add_scalar('Accuracy/test_accuracy', np.mean(test_acc), epoch)
+            # print('Batch_idx: %d | Test Loss: %.3f | Test Acc: %.3f%% (%d/%d)' % (
+            # batch_idx, test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+        mean_test_loss = np.mean(test_losses)
+        mean_test_acc = np.mean(test_acc)
+        print('Epoch: {} | Test Loss: {} | Test Acc: {}'.format(epoch, mean_test_loss, mean_test_acc))
+        writer.add_scalar('Loss/test_loss', mean_test_loss, epoch)
+        writer.add_scalar('Accuracy/test_accuracy', mean_test_acc, epoch)
 
         # Save checkpoint.
     acc = 100. * correct / total
@@ -358,17 +370,19 @@ def test(epoch, config, savename):
             'epoch': epoch,
             'config': config
         }
-        torch.save(state, os.path.join('.\summaries\\', savename, 'ckpt.pth'))
+        torch.save(state, os.path.join('./summaries/', savename, 'ckpt.pth'))
         best_acc = acc
 
 
 if __name__ == "__main__":
-    train_loader, valid_loader, test_loader = getDataLoaders(cifar10_dir, test_data_dir, config['batch_size'], train_tfms=transform_train, valid_tfms=transform_test)
+    train_loader, valid_loader, test_loader = getDataLoaders(cifar10_dir, test_data_dir, config['batch_size'],
+                                                             train_tfms=transform_train, valid_tfms=transform_test)
 
-    train_loader = DeviceDataLoader(train_loader, device)
-    valid_loader = DeviceDataLoader(valid_loader, device)
-    test_loader = DeviceDataLoader(test_loader, device)
-
+    # train_loader = DeviceDataLoader(train_loader, device)
+    # valid_loader = DeviceDataLoader(valid_loader, device)
+    # test_loader = DeviceDataLoader(test_loader, device)
+    print(len(train_loader))
+    print(train_loader.batch_size)
     # Code below to test if dataloader is working properly:
     cifar10_classes = ["airplane", "automobile", "bird", "cat", "deer",
                        "dog", "frog", "horse", "ship", "truck"]
@@ -402,7 +416,8 @@ if __name__ == "__main__":
         print("Total parameters exceeding 5M")
         print("===============================")
 
-    optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=config["momentum"], weight_decay=config["weight_decay"])
+    optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=config["momentum"],
+                          weight_decay=config["weight_decay"])
     # optimizer = Lookahead(optimizer, k=5, alpha=0.5)
     criterion = nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
@@ -416,24 +431,24 @@ if __name__ == "__main__":
         scheduler.step()
     writer.close()
 
-# # Get the csv file of predictions on Test Dataset:
-# model.eval()
+    # Get the csv file of predictions on Test Dataset:
+    model.eval()
 
-# # Store predictions
-# predictions = []
-#
-# # Disable gradient computation for inference
-# with torch.no_grad():
-#     for images in test_loader:
-#         images = images.to(device)  # Move images to same device as model
-#         outputs = model(images)  # Get model predictions
-#         _, predicted = torch.max(outputs, 1)  # Get class with the highest probability
-#         predictions.extend(predicted.cpu().numpy())  # Convert tensor to list
-#
-# # Create a DataFrame for submission
-# submission_df = pd.DataFrame({'ID': list(range(0, len(predictions))), 'Labels': predictions})
-#
-# # Save to CSV file
-# submission_df.to_csv('submissionTest.csv', index=False)
-#
-# print("Submission file saved as 'submissionTest.csv'")
+    # Store predictions
+    predictions = []
+
+    # Disable gradient computation for inference
+    with torch.no_grad():
+        for images in test_loader:
+            images = images.to(device)  # Move images to same device as model
+            outputs = model(images)  # Get model predictions
+            _, predicted = torch.max(outputs, 1)  # Get class with the highest probability
+            predictions.extend(predicted.cpu().numpy())  # Convert tensor to list
+
+    # Create a DataFrame for submission
+    submission_df = pd.DataFrame({'ID': list(range(0, len(predictions))), 'Labels': predictions})
+
+    # Save to CSV file
+    submission_df.to_csv('submissionTest2.csv', index=False)
+
+    print("Submission file saved as 'submissionTest.csv'")
