@@ -14,26 +14,26 @@ Make sure you have a compatible version of PyTorch installed. You can set up the
 #### For NVIDIA GPU (CUDA) Users:
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
+```
 You can replace the final 'cu118' with your cuda version, 'cu124' for CUDA 12.4 or 'cu126' for CUDA 12.6
 
 #### For Mac M1/M2 Users (MPS Support):
 ```bash
 conda install pytorch torchvision torchaudio -c pytorch-nightly
-
+```
 for conda environment
 
 or
 
 ```bash
 pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
-
+```
 Make sure to have MacOS 12.3 or later and Xcode command-line tools
 
 #### For regular Pytorch install which uses CPU only:
 ```bash
 pip3 install torch torchvision torchaudio' 
-
+```
 #### Get the Dataset:
 
 From either kaggle competition download, or "https://www.cs.toronto.edu/~kriz/cifar.html", and make sure to use `test_batch` from original dataset as `valid_batch` for code. 
