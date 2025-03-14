@@ -79,4 +79,8 @@ To visualize accuracy and loss:
 
 ### Adjusting Parameters:
  In main training file, you can adjust the parameters like batch size, number of epochs, number of workers for dataloader, etc. in `config` dictionary. Adjust accordingly to your resources and preferences.
- 
+
+### References:
+Used concepts from 'https://github.com/Nikunj-Gupta/Efficient_ResNets' for best performing model base architecture.
+
+For deeper layer network, referenced from: 'https://arxiv.org/pdf/1512.03385'
