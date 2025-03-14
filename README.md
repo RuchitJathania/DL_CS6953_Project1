@@ -17,7 +17,7 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 ```
 You can replace the final 'cu118' with your cuda version, 'cu124' for CUDA 12.4 or 'cu126' for CUDA 12.6
 
-#### For Mac M1/M2 Users (MPS Support):
+#### For Mac MPS Users:
 ```bash
 conda install pytorch torchvision torchaudio -c pytorch-nightly
 ```
