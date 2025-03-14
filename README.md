@@ -43,11 +43,11 @@ From either kaggle competition download, or "https://www.cs.toronto.edu/~kriz/ci
 ### 1. Adjust Directory Paths
 Before running, ensure that the directory paths in `resnet3_v1_4.py` match your system's structure.
 
-Edit these lines in `resnet3_v1_4.py` to reflect your file locations:
-plot_save_dir = os.path.join("checkpoints", "resnet3_v1_4") 
-summary_dir = os.path.join("summaries", "resnet3_v1_4") 
-cifar10_dir = 'kaggle/input/DLProj1/cifar-10-python/cifar-10-batches-py' 
-test_data_dir = 'kaggle/input/DLProj1/cifar_test_nolabel.pkl'
+Edit these lines in `resnet3_v1_4.py` to reflect your file locations:  
+plot_save_dir = os.path.join("checkpoints", "resnet3_v1_4")  
+summary_dir = os.path.join("summaries", "resnet3_v1_4")  
+cifar10_dir = 'kaggle/input/DLProj1/cifar-10-python/cifar-10-batches-py'  
+test_data_dir = 'kaggle/input/DLProj1/cifar_test_nolabel.pkl'  
 
 If your dataset is stored elsewhere, update these paths accordingly.
 
