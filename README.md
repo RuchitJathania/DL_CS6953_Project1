@@ -69,9 +69,9 @@ To visualize accuracy and loss:
 ### Project Structure:
 
 ├── BestPerformingModel/  
-│   ├── resnet3_v1_4.py  # Main model script  
-│   ├── lookahead_optim.py  # Lookahead optimizer  
-│   ├── plotTensorboard2.py  # Utility for TensorBoard visualization  
+│    ├── resnet3_v1_4.py  # Main model script  
+│    ├── lookahead_optim.py  # Lookahead optimizer  
+│    ├── plotTensorboard2.py  # Utility for TensorBoard visualization  
 ├── checkpoints/  # Model checkpoints will be stored here  
 ├── summaries/  # TensorBoard logs  
 ├── datasets/  # CIFAR-10 dataset (if stored locally)  
